@@ -1,0 +1,42 @@
+---
+- hosts: webserver
+  become: yes 
+  ignore_errors: yes
+  tasks:
+    - name: Uninstall packages
+      yum:
+        name: "{{ packages }}"
+      vars:
+        packages: 
+                  - docker
+                  - docker-client
+                  - docker-client-latest
+                  - docker-common 
+                  - docker-latest 
+                  - docker-latest-logrotate 
+                  - docker-logrotate 
+                  - docker-engine
+        state: absent 
+    - name: Install yum_utils
+      yum: 
+        name: yum-utils
+        state: present 
+    - name: Create docker repository
+      yum_repository:
+        name: docker
+        description: docker repo
+        baseurl:  https://download.docker.com/linux/centos/docker-ce.repo
+    - name: Install docker packages
+      yum:
+        name:
+            - docker-ce
+            - docker-ce-cli 
+            - containerd.io 
+            - docker-buildx-plugin 
+            - docker-compose-plugin
+        state: latest
+    - name: start the daemon
+      systemd:
+         name: docker
+         state: started
+
